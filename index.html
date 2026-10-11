@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head<link rel="manifest" href="manifest.json">>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tofzy Store</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #222;
+        }
+
+        header {
+            background: #155eef;
+            color: white;
+            padding: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        .hero {
+            background: white;
+            padding: 30px 15px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            color: #155eef;
+        }
+
+        .search-box {
+            display: block;
+            width: min(90%, 500px);
+            margin: 20px auto;
+            padding: 13px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit, minmax(220px, 1fr)
+            );
+            gap: 20px;
+            padding: 20px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .product {
+            background: white;
+            padding: 16px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #00000010;
+        }
+
+        .product img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .price {
+            color: #155eef;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        button {
+            background: #155eef;
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .remove {
+            background: #d93025;
+        }
+
+        .cart-section,
+        .assistant {
+            background: white;
+            max-width: 750px;
+            margin: 25px auto;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .cart-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        #chatMessages {
+            min-height: 60px;
+            background: #f4f6fb;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-form input {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        footer {
+            background: #15233f;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .cart-row {
+                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .chat-form {
+                flex-wrap: wrap;
+            }
+
+            .chat-form input {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Tofzy Store</h1>
+    <div>🛒 Cart: <span id="cartCount">0</span></div>
+</header>
+
+<section class="hero">
+    <h2>Discover Your Next Favourite Product</h2>
+    <p>Welcome to Tofzy Store!</p>
+</section>
+
+<input
+    id="searchInput"
+    class="search-box"
+    type="search"
+    placeholder="Search products..."
+    aria-label="Search products"
+>
+
+<section class="products" id="productList"></section>
+
+<section class="cart-section">
+    <h2>Your Shopping Cart</h2>
+
+    <div id="cartItems">Your cart is empty.</div>
+
+    <h3>Total: <span id="cartTotal">₦0</span></h3>
+
+    <button onclick="clearCart()">Clear Cart</button>
+</section>
+
+<section class="assistant">
+    <h2>🤖 Tofzy Shopping Assistant</h2>
+
+    <p>Ask me about the products in our store!</p>
+
+    <div id="chatMessages" aria-live="polite">
+        Assistant: Hi! Try asking, "Which product is cheapest?"
+    </div>
+
+    <form class="chat-form" id="chatForm">
+        <input
+            id="chatInput"
+            type="text"
+            placeholder="Ask a shopping question..."
+            aria-label="Your shopping question"
+            required
+        >
+
+        <button type="submit">Send</button>
+    </form>
+</section>
+
+<footer>
+    <p>© 2026 Tofzy Store
+    owned and published by Isreal(Tofzy)</p>
+    <p>Learning to build with code and AI.</p>
+</footer>
+
+<script>
+    const products = [
+        {
+            id: 1,
+            name: "Wireless Earbuds",
+            price: 8000,
+            image: "image: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=400",",
+            description: "Enjoy music on the go."
+        },
+        {
+            id: 2,
+            name: "Phone Stand",
+            price: 5000,
+            image: "image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400",",
+            description: "Keep your phone upright."
+        },
+        {
+            id: 3,
+            name: "Travel Backpack",
+            price: 12000,
+            image: "image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400",",
+            description: "Carry your everyday essentials."
+        },
+        {
+            id: 4,
+            name: "Laptop Sleeve",
+            price: 7000,
+            image: "image: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=400",",
+            description: "A sleeve for carrying your laptop."
+        }
+    ];
+
+    let cart = JSON.parse(
+    localStorage.getItem("tofzyCart")
+) || [];
+
+    const money = amount =>
+        "₦" + amount.toLocaleString("en-NG");
+
+    function displayProducts(items) {
+        const list = document.getElementById("productList");
+
+        list.replaceChildren();
+
+        if (items.length === 0) {
+            const message = document.createElement("p");
+            message.textContent = "No products found.";
+            list.appendChild(message);
+            return;
+        }
+
+        items.forEach(product => {
+            const card = document.createElement("article");
+            card.className = "product";
+
+            const img = document.createElement("img");
+            img.src = product.image;
+            img.alt = product.name;
+            img.loading = "lazy";
+
+            img.onerror = function () {
+                this.style.display = "none";
+            };
+
+            const name = document.createElement("h3");
+            name.textContent = product.name;
+
+            const description = document.createElement("p");
+            description.textContent = product.description;
+
+            const price = document.createElement("p");
+            price.className = "price";
+            price.textContent = money(product.price);
+
+            const button = document.createElement("button");
+            button.textContent = "Add to Cart";
+            button.addEventListener("click", () => {
+                addToCart(product.id);
+            });
+
+            card.append(img, name, description, price, button);
+            list.appendChild(card);
+        });
+    }
+
+    function addToCart(productId) {
+        const product = products.find(p => p.id === productId);
+
+        if (!product) return;
+
+        cart.push(product);
+        updateCart();
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    function clearCart() {
+        cart = [];
+        updateCart();
+    }
+
+    function updateCart() {
+        document.getElementById("cartCount").textContent = cart.length;
+
+        const container = document.getElementById("cartItems");
+        container.replaceChildren();
+
+        if (cart.length === 0) {
+            container.textContent = "Your cart is empty.";
+        } else {
+            cart.forEach((item, index) => {
+                const row = document.createElement("div");
+                row.className = "cart-row";
+
+                const description = document.createElement("span");
+                description.textContent =
+                    item.name + " — " + money(item.price);
+
+                const button = document.createElement("button");
+                button.className = "remove";
+                button.textContent = "Remove";
+                button.addEventListener("click", () => {
+                    removeFromCart(index);
+                });
+
+                row.append(description, button);
+                container.appendChild(row);
+            });
+        }
+
+        const total = cart.reduce(
+            (sum, item) => sum + item.price, 0
+        );
+
+        document.getElementById("cartTotal").textContent = money(total);
+    }
+
+    document.getElementById("searchInput").addEventListener(
+        "input",
+        function () {
+            const query = this.value.trim().toLowerCase();
+
+            const filtered = products.filter(product =>
+                product.name.toLowerCase().includes(query) ||
+                product.description.toLowerCase().includes(query)
+            );
+
+            displayProducts(filtered);
+        }
+    );
+
+    function assistantReply(question) {
+        const q = question.toLowerCase();
+
+        if (q.includes("cheap") || q.includes("cheapest")) {
+            const cheapest = products.reduce(
+                (a, b) => a.price < b.price ? a : b
+            );
+
+            return cheapest.name + " is the cheapest product at " +
+                money(cheapest.price) + ".";
+        }
+
+        if (q.includes("cart")) {
+            const total = cart.reduce(
+                (sum, item) => sum + item.price, 0
+            );
+
+            return "Your cart has " + cart.length +
+                " item(s), with a total of " + money(total) + ".";
+        }
+
+        if (q.includes("price") || q.includes("cost")) {
+            return products.map(p =>
+                p.name + ": " + money(p.price)
+            ).join(" | ");
+        }
+
+        if (q.includes("hello") || q.includes("hi")) {
+            return "Hello! I can help you explore products and prices.";
+        }
+
+        return "I can help with product prices, the cheapest product, " +
+            "and your cart. Try asking one of those questions!";
+    }
+
+    document.getElementById("chatForm").addEventListener(
+        "submit",
+        function (event) {
+            event.preventDefault();
+
+            const input = document.getElementById("chatInput");
+            const question = input.value.trim();
+
+            if (!question) return;
+
+            const messages = document.getElementById("chatMessages");
+
+            const userMessage = document.createElement("p");
+            userMessage.textContent = "You: " + question;
+<manifest.json {
+  "id": "./",
+  "name": "Tofzy Store",
+  "short_name": "Tofzy",
+  "description": "Discover products at Tofzy Store.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#155eef",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+  }>
+            const reply = document.createElement("p");
+            reply.textContent = "Assistant: " + assistantReply(question);
+
+            messages.replaceChildren(userMessage, reply);
+            input.value = "";
+        }
+    );
+
+    displayProducts(products);
+    updateCart();
+</script>
+
+</body>
+  </html>
